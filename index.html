@@ -3,7 +3,7 @@
 Created using JS Bin
 http://bin.webduino.io
 
-Copyright (c) 2020 by anonymous (http://bin.webduino.io/qeweh/1/edit)
+Copyright (c) 2020 by anonymous (http://bin.webduino.io/regef/1/edit)
 
 Released under the MIT license: http://jsbin.mit-license.org
 -->
@@ -709,7 +709,7 @@ _asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
                           line_bot($.extend({}, linebot2, { message: '門已關閉' }));
                           servo.angle = 85;
                         } else if (linebot2.onVal == '開關') {
-                          line_bot($.extend({}, linebot, { message: '開關切換狀態' }));
+                          line_bot($.extend({}, linebot2, { message: '開關切換狀態' }));
                           relay.toggle();
                         } else {
                           if (linebot2.onVal != '關門' && linebot2.onVal != '臥室3' && linebot2.onVal != '開門' && linebot2.onVal != '臥室2' && linebot2.onVal != '臥室1' && linebot2.onVal != '客廳' && linebot2.onVal != '樓梯' && linebot2.onVal != '全關' && linebot2.onVal != '玄關' && linebot2.onVal != '關門' && linebot2.onVal != '開關' && linebot2.onVal != '全開') {
