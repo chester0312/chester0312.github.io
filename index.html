@@ -1,0 +1,743 @@
+<!doctype html>
+<!--
+Created using JS Bin
+http://bin.webduino.io
+
+Copyright (c) 2020 by anonymous (http://bin.webduino.io/boxec/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>智慧房屋</title>
+    <script src="https://blocklypro.webduino.io/node_modules/jquery/dist/jquery.min.js?rev=2f6b11a7e914718e0290410e85366fe9"></script>
+    <script src="https://blocklypro.webduino.io/dist/lib/webduino-all-0.4.20.min.js?rev=4426739c00d85325cb2d3d701fa50666"></script>
+    <script src="https://blocklypro.webduino.io/dist/webduino-blockly.min.js?rev=acce6e8de9b12b5095f5eca52b86b098"></script>
+    <script src="https://blocklypro.webduino.io/dist/lib/firebase.min.js?rev=c0bfd493efd477d098a4ae9e92b13880"></script>
+    <script src="https://blocklypro.webduino.io/dist/lib/runtime.min.js?rev=683a69503433786202911b4d9f766100"></script>
+    <script src="https://buberhu.github.io/webduino_LINE_V3/main.js"></script>
+<style id="jsbin-css">
+#demo-area-01-show {
+    font-size: 60px;
+    pointer-events: auto!important;
+    color: rgb(255, 255, 255);
+    text-align: center;
+}
+
+.db5 {
+    font-size: 24px;
+    outline: none;
+    margin: 10px 10px;
+    pointer-events: auto!important;
+    color: rgb(128, 36, 36);
+    border: 3px rgb(167, 130, 63) double;
+    font-weight: bold;
+}
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: url(http://www.oxxostudio.tw/firebase-webduino-im/bg2.jpg);
+    background-size: cover;
+    color: rgb(255, 255, 255);
+    text-align: center;
+}
+
+#im {
+    position: relative;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 600px;
+    height: 100%;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, .4);
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+    <div></div>
+</body>
+
+<body>
+    <div><span id="demo-area-01-show">智慧房屋</span></div>
+    <div><button id="demo-area-05-btn1" class="db5">全開</button>
+        <button id="demo-area-05-btn2" class="db5">全關</button></div>
+    <div><button id="demo-area-05-btn3" class="db5">玄關</button>
+        <button id="demo-area-05-btn4" class="db5">客廳</button>
+        <button id="demo-area-05-btn5" class="db5">樓梯</button></div>
+    <div><button id="demo-area-05-btn6" class="db5">臥室1</button>
+        <button id="demo-area-05-btn7" class="db5">臥室2</button>
+        <button id="demo-area-05-btn8" class="db5">臥室3</button></div>
+    <div><button id="demo-area-05-btn9" class="db5">開門</button>
+        <button id="demo-area-05-btn10" class="db5">關門</button>
+        <button id="demo-area-05-btn11" class="db5">開關</button></div>
+<script id="jsbin-javascript">
+'use strict';
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } step("next"); }); }; }
+
+_asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
+  var led, rfid, led2, led3, servo, led4, led5, myData, led6, myFirebase, relay, linebot, linebot1, linebot2, webpage, get_date, get_time, RFID;
+  return regeneratorRuntime.wrap(function _callee16$(_context16) {
+    while (1) {
+      switch (_context16.prev = _context16.next) {
+        case 0:
+          get_time = function get_time(t) {
+            var varTime = new Date(),
+                varHours = varTime.getHours(),
+                varMinutes = varTime.getMinutes(),
+                varSeconds = varTime.getSeconds();
+            var varNow;
+            if (t == "hms") {
+              varNow = varHours + ":" + varMinutes + ":" + varSeconds;
+            } else if (t == "h") {
+              varNow = varHours;
+            } else if (t == "m") {
+              varNow = varMinutes;
+            } else if (t == "s") {
+              varNow = varSeconds;
+            }
+            return varNow;
+          };
+
+          get_date = function get_date(t) {
+            var varDay = new Date(),
+                varYear = varDay.getFullYear(),
+                varMonth = varDay.getMonth() + 1,
+                varDate = varDay.getDate();
+            var varNow;
+            if (t == "ymd") {
+              varNow = varYear + "/" + varMonth + "/" + varDate;
+            } else if (t == "mdy") {
+              varNow = varMonth + "/" + varDate + "/" + varYear;
+            } else if (t == "dmy") {
+              varNow = varDate + "/" + varMonth + "/" + varYear;
+            } else if (t == "y") {
+              varNow = varYear;
+            } else if (t == "m") {
+              varNow = varMonth;
+            } else if (t == "d") {
+              varNow = varDate;
+            }
+            return varNow;
+          };
+
+          webpage = function webpage() {
+            document.getElementById('demo-area-05-btn1').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+              return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                  switch (_context.prev = _context.next) {
+                    case 0:
+                      led.on();
+                      led2.on();
+                      led3.on();
+                      led4.on();
+                      led5.on();
+                      led6.on();
+
+                    case 6:
+                    case 'end':
+                      return _context.stop();
+                  }
+                }
+              }, _callee, this);
+            })));
+            document.getElementById('demo-area-05-btn2').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+              return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                while (1) {
+                  switch (_context2.prev = _context2.next) {
+                    case 0:
+                      led.off();
+                      led2.off();
+                      led3.off();
+                      led4.off();
+                      led5.off();
+                      led6.off();
+
+                    case 6:
+                    case 'end':
+                      return _context2.stop();
+                  }
+                }
+              }, _callee2, this);
+            })));
+            document.getElementById('demo-area-05-btn3').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+              return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                while (1) {
+                  switch (_context3.prev = _context3.next) {
+                    case 0:
+                      led.toggle();
+
+                    case 1:
+                    case 'end':
+                      return _context3.stop();
+                  }
+                }
+              }, _callee3, this);
+            })));
+            document.getElementById('demo-area-05-btn4').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+              return regeneratorRuntime.wrap(function _callee4$(_context4) {
+                while (1) {
+                  switch (_context4.prev = _context4.next) {
+                    case 0:
+                      led2.toggle();
+
+                    case 1:
+                    case 'end':
+                      return _context4.stop();
+                  }
+                }
+              }, _callee4, this);
+            })));
+            document.getElementById('demo-area-05-btn5').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+              return regeneratorRuntime.wrap(function _callee5$(_context5) {
+                while (1) {
+                  switch (_context5.prev = _context5.next) {
+                    case 0:
+                      led3.toggle();
+
+                    case 1:
+                    case 'end':
+                      return _context5.stop();
+                  }
+                }
+              }, _callee5, this);
+            })));
+            document.getElementById('demo-area-05-btn6').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
+              return regeneratorRuntime.wrap(function _callee6$(_context6) {
+                while (1) {
+                  switch (_context6.prev = _context6.next) {
+                    case 0:
+                      led4.toggle();
+
+                    case 1:
+                    case 'end':
+                      return _context6.stop();
+                  }
+                }
+              }, _callee6, this);
+            })));
+            document.getElementById('demo-area-05-btn7').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
+              return regeneratorRuntime.wrap(function _callee7$(_context7) {
+                while (1) {
+                  switch (_context7.prev = _context7.next) {
+                    case 0:
+                      led5.toggle();
+
+                    case 1:
+                    case 'end':
+                      return _context7.stop();
+                  }
+                }
+              }, _callee7, this);
+            })));
+            document.getElementById('demo-area-05-btn8').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
+              return regeneratorRuntime.wrap(function _callee8$(_context8) {
+                while (1) {
+                  switch (_context8.prev = _context8.next) {
+                    case 0:
+                      led6.toggle();
+
+                    case 1:
+                    case 'end':
+                      return _context8.stop();
+                  }
+                }
+              }, _callee8, this);
+            })));
+            document.getElementById('demo-area-05-btn9').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee9() {
+              return regeneratorRuntime.wrap(function _callee9$(_context9) {
+                while (1) {
+                  switch (_context9.prev = _context9.next) {
+                    case 0:
+                      servo.angle = 175;
+
+                    case 1:
+                    case 'end':
+                      return _context9.stop();
+                  }
+                }
+              }, _callee9, this);
+            })));
+            document.getElementById('demo-area-05-btn10').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
+              return regeneratorRuntime.wrap(function _callee10$(_context10) {
+                while (1) {
+                  switch (_context10.prev = _context10.next) {
+                    case 0:
+                      servo.angle = 85;
+
+                    case 1:
+                    case 'end':
+                      return _context10.stop();
+                  }
+                }
+              }, _callee10, this);
+            })));
+            document.getElementById('demo-area-05-btn11').addEventListener('click', _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
+              return regeneratorRuntime.wrap(function _callee11$(_context11) {
+                while (1) {
+                  switch (_context11.prev = _context11.next) {
+                    case 0:
+                      relay.toggle();
+
+                    case 1:
+                    case 'end':
+                      return _context11.stop();
+                  }
+                }
+              }, _callee11, this);
+            })));
+          };
+
+          RFID = (function () {
+            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
+              return regeneratorRuntime.wrap(function _callee14$(_context14) {
+                while (1) {
+                  switch (_context14.prev = _context14.next) {
+                    case 0:
+                      rfid.read();
+                      rfid.on('enter', (function () {
+                        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(_uid) {
+                          return regeneratorRuntime.wrap(function _callee12$(_context12) {
+                            while (1) {
+                              switch (_context12.prev = _context12.next) {
+                                case 0:
+                                  rfid._uid = _uid;
+                                  if (rfid._uid == '60962E10' || rfid._uid == 'D5182E3E' || rfid._uid == 'E5D05F3E' || rfid._uid == '3212D811') {
+                                    servo.angle = 175;
+                                  }
+
+                                  if (!(rfid._uid == '60962E10')) {
+                                    _context12.next = 12;
+                                    break;
+                                  }
+
+                                  _context12.next = 5;
+                                  return delay(0.8);
+
+                                case 5:
+                                  myData.column0 = '倪承義';
+                                  myData.column1 = get_date("ymd");
+                                  myData.column2 = get_time("hms");
+                                  writeSheetData(myData);
+                                  myFirebase.push({
+                                    時間: get_time("hms"),
+                                    日期: get_date("ymd"),
+                                    名稱: '倪承義'
+                                  });
+                                  _context12.next = 12;
+                                  return delay(2);
+
+                                case 12:
+                                  if (!(rfid._uid == 'D5182E3E')) {
+                                    _context12.next = 22;
+                                    break;
+                                  }
+
+                                  _context12.next = 15;
+                                  return delay(0.8);
+
+                                case 15:
+                                  myData.column0 = '2';
+                                  myData.column1 = get_date("ymd");
+                                  myData.column2 = get_time("hms");
+                                  writeSheetData(myData);
+                                  myFirebase.push({
+                                    時間: get_time("hms"),
+                                    日期: get_date("ymd"),
+                                    名稱: '2'
+                                  });
+                                  _context12.next = 22;
+                                  return delay(2);
+
+                                case 22:
+                                  if (!(rfid._uid == 'E5D05F3E')) {
+                                    _context12.next = 32;
+                                    break;
+                                  }
+
+                                  _context12.next = 25;
+                                  return delay(0.8);
+
+                                case 25:
+                                  myData.column0 = '3';
+                                  myData.column1 = get_date("ymd");
+                                  myData.column2 = get_time("hms");
+                                  writeSheetData(myData);
+                                  myFirebase.push({
+                                    時間: get_time("hms"),
+                                    日期: get_date("ymd"),
+                                    名稱: '3'
+                                  });
+                                  _context12.next = 32;
+                                  return delay(2);
+
+                                case 32:
+                                  if (!(rfid._uid == '3212D811')) {
+                                    _context12.next = 42;
+                                    break;
+                                  }
+
+                                  _context12.next = 35;
+                                  return delay(0.8);
+
+                                case 35:
+                                  myData.column0 = '4';
+                                  myData.column1 = get_date("ymd");
+                                  myData.column2 = get_time("hms");
+                                  writeSheetData(myData);
+                                  myFirebase.push({
+                                    時間: get_time("hms"),
+                                    日期: get_date("ymd"),
+                                    名稱: '4'
+                                  });
+                                  _context12.next = 42;
+                                  return delay(2);
+
+                                case 42:
+                                case 'end':
+                                  return _context12.stop();
+                              }
+                            }
+                          }, _callee12, this);
+                        }));
+
+                        return function (_x) {
+                          return ref.apply(this, arguments);
+                        };
+                      })());
+                      rfid.on('leave', (function () {
+                        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(_uid) {
+                          return regeneratorRuntime.wrap(function _callee13$(_context13) {
+                            while (1) {
+                              switch (_context13.prev = _context13.next) {
+                                case 0:
+                                  _context13.next = 2;
+                                  return delay(2);
+
+                                case 2:
+                                  servo.angle = 85;
+
+                                case 3:
+                                case 'end':
+                                  return _context13.stop();
+                              }
+                            }
+                          }, _callee13, this);
+                        }));
+
+                        return function (_x2) {
+                          return ref.apply(this, arguments);
+                        };
+                      })());
+
+                    case 3:
+                    case 'end':
+                      return _context14.stop();
+                  }
+                }
+              }, _callee14, this);
+            }));
+
+            return function RFID() {
+              return ref.apply(this, arguments);
+            };
+          })();
+
+          boardReady({ device: 'n3k3E' }, (function () {
+            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(board) {
+              var firebase1ca6d, flag1ca6d;
+              return regeneratorRuntime.wrap(function _callee15$(_context15) {
+                while (1) {
+                  switch (_context15.prev = _context15.next) {
+                    case 0:
+                      board.samplingInterval = 250;
+                      led = getLed(board, 2);
+                      led2 = getLed(board, 3);
+                      led3 = getLed(board, 4);
+                      led4 = getLed(board, 5);
+                      led5 = getLed(board, 6);
+                      led6 = getLed(board, 7);
+                      servo = getServo(board, 8);
+                      rfid = getRFID(board);
+                      relay = getRelay(board, 9);
+                      myData = {};
+                      myData.sheetUrl = 'https://docs.google.com/spreadsheets/d/1s3EuZBl6KHY1FNu64Qx2CVREtA9n-W2r5dy1Rzzn5nI/edit#gid=0';
+                      myData.sheetName = '工作表1';
+                      myFirebase = new Firebase('https://rfid-d0a52.firebaseio.com/');
+                      flag1ca6d = true;
+
+                      linebot = { token: 'roF4gPXN40LNOBs/gsj5Auq2Yu4TMEo9dMAagfQaY7M520sSpUDtLvpCpOQS9c/3UZt0VUi8cyKiD2WIEE8RkEA2ReqIKOGi17w2k6vAaG0jcwVro5/vvyWxFk96vRTQH6D6m+l8h6vQ52PNBlJjYQdB04t89/1O/w1cDnyilFU=', userId: 'U3a72bbdfa86fdc013ee06ddaf49e9f30', onVal: '' };
+                      firebase1ca6d = new Firebase('https://webduino-linebot-1ca6d.firebaseio.com/');
+                      flag1ca6d = true;
+
+                      linebot1 = { token: 'roF4gPXN40LNOBs/gsj5Auq2Yu4TMEo9dMAagfQaY7M520sSpUDtLvpCpOQS9c/3UZt0VUi8cyKiD2WIEE8RkEA2ReqIKOGi17w2k6vAaG0jcwVro5/vvyWxFk96vRTQH6D6m+l8h6vQ52PNBlJjYQdB04t89/1O/w1cDnyilFU=', userId: 'U5607ecd6a162e32c53da14ee17ae7bac', onVal: '' };
+                      firebase1ca6d = new Firebase('https://webduino-linebot-1ca6d.firebaseio.com/');
+                      flag1ca6d = true;
+
+                      linebot2 = { token: 'roF4gPXN40LNOBs/gsj5Auq2Yu4TMEo9dMAagfQaY7M520sSpUDtLvpCpOQS9c/3UZt0VUi8cyKiD2WIEE8RkEA2ReqIKOGi17w2k6vAaG0jcwVro5/vvyWxFk96vRTQH6D6m+l8h6vQ52PNBlJjYQdB04t89/1O/w1cDnyilFU=', userId: 'U25a70f15797d2c6399450ba9a74528f5', onVal: '' };
+                      firebase1ca6d = new Firebase('https://webduino-linebot-1ca6d.firebaseio.com/');
+                      relay.off();
+                      led.off();
+                      led2.off();
+                      led3.off();
+                      led4.off();
+                      led5.off();
+                      led6.off();
+                      servo.angle = 80;
+                      line_bot($.extend({}, linebot, { message: '連線成功' }));
+                      line_bot($.extend({}, linebot1, { message: '連線成功' }));
+                      line_bot($.extend({}, linebot2, { message: '連線成功' }));
+                      webpage();
+                      firebase1ca6d.on('value', function (s) {
+                        var msg1ca6d = false;
+                        if (flag1ca6d) {
+                          flag1ca6d = false;
+                          return;
+                        } else {
+                          s.forEach(function (e) {
+                            if (e.val().userid === linebot.userId && e.val().message !== '') {
+                              linebot.onVal = e.val().message;
+                              msg1ca6d = true;
+                            }
+                          });
+                          if (!msg1ca6d) return;
+                        }
+                        if (linebot.onVal == '全開') {
+                          line_bot($.extend({}, linebot, { message: '已經幫你把全部的燈打開' }));
+                          led.on();
+                          led2.on();
+                          led3.on();
+                          led4.on();
+                          led5.on();
+                          led6.on();
+                        } else if (linebot.onVal == '全關') {
+                          line_bot($.extend({}, linebot, { message: '已經幫你把全部的燈關閉' }));
+                          led.off();
+                          led2.off();
+                          led3.off();
+                          led4.off();
+                          led5.off();
+                          led6.off();
+                        } else if (linebot.onVal == '玄關') {
+                          line_bot($.extend({}, linebot, { message: '玄關燈切換狀態' }));
+                          led.toggle();
+                        } else if (linebot.onVal == '客廳') {
+                          line_bot($.extend({}, linebot, { message: '客廳燈切換狀態' }));
+                          led2.toggle();
+                        } else if (linebot.onVal == '樓梯') {
+                          line_bot($.extend({}, linebot, { message: '樓梯燈切換狀態' }));
+                          led3.toggle();
+                        } else if (linebot.onVal == '臥室1') {
+                          line_bot($.extend({}, linebot, { message: '臥室1切換狀態' }));
+                          led4.toggle();
+                        } else if (linebot.onVal == '臥室2') {
+                          line_bot($.extend({}, linebot, { message: '臥室2切換狀態' }));
+                          led5.toggle();
+                        } else if (linebot.onVal == '臥室3') {
+                          line_bot($.extend({}, linebot, { message: '臥室3切換狀態' }));
+                          led6.toggle();
+                        } else if (linebot.onVal == '燈全開/關') {
+                          line_bot($.extend({}, linebot, { message: '已經幫你把全部的燈切換狀態' }));
+                          led.toggle();
+                          led2.toggle();
+                          led3.toggle();
+                          led4.toggle();
+                          led5.toggle();
+                          led6.toggle();
+                        } else if (linebot.onVal == '網頁') {
+                          line_bot($.extend({}, linebot, { message: '開啟網頁' }));
+                        } else if (linebot.onVal == '開門') {
+                          line_bot($.extend({}, linebot, { message: '門已開啟' }));
+                          servo.angle = 175;
+                        } else if (linebot.onVal == '關門') {
+                          line_bot($.extend({}, linebot, { message: '門已關閉' }));
+                          servo.angle = 85;
+                        } else if (linebot.onVal == '開關') {
+                          line_bot($.extend({}, linebot, { message: '開關切換狀態' }));
+                          relay.toggle();
+                        } else {
+                          if (linebot.onVal != '關門' && linebot.onVal != '臥室3' && linebot.onVal != '開門' && linebot.onVal != '臥室2' && linebot.onVal != '臥室1' && linebot.onVal != '客廳' && linebot.onVal != '樓梯' && linebot.onVal != '全關' && linebot.onVal != '玄關' && linebot.onVal != '關門' && linebot.onVal != '開關' && linebot.onVal != '全開') {
+                            line_bot($.extend({}, linebot, { message: '指令錯誤' }));
+                          }
+                        }
+                      });
+                      firebase1ca6d.on('value', function (s) {
+                        var msg1ca6d = false;
+                        if (flag1ca6d) {
+                          flag1ca6d = false;
+                          return;
+                        } else {
+                          s.forEach(function (e) {
+                            if (e.val().userid === linebot1.userId && e.val().message !== '') {
+                              linebot1.onVal = e.val().message;
+                              msg1ca6d = true;
+                            }
+                          });
+                          if (!msg1ca6d) return;
+                        }
+                        if (linebot1.onVal == '全開') {
+                          line_bot($.extend({}, linebot1, { message: '已經幫你把全部的燈打開' }));
+                          led.on();
+                          led2.on();
+                          led3.on();
+                          led4.on();
+                          led5.on();
+                          led6.on();
+                        } else if (linebot1.onVal == '全關') {
+                          line_bot($.extend({}, linebot1, { message: '已經幫你把全部的燈關閉' }));
+                          led.off();
+                          led2.off();
+                          led3.off();
+                          led4.off();
+                          led5.off();
+                          led6.off();
+                        } else if (linebot1.onVal == '玄關') {
+                          line_bot($.extend({}, linebot1, { message: '玄關燈切換狀態' }));
+                          led.toggle();
+                        } else if (linebot1.onVal == '客廳') {
+                          line_bot($.extend({}, linebot1, { message: '客廳燈切換狀態' }));
+                          led2.toggle();
+                        } else if (linebot1.onVal == '樓梯') {
+                          line_bot($.extend({}, linebot1, { message: '樓梯燈切換狀態' }));
+                          led3.toggle();
+                        } else if (linebot1.onVal == '臥室1') {
+                          line_bot($.extend({}, linebot1, { message: '臥室1切換狀態' }));
+                          led4.toggle();
+                        } else if (linebot1.onVal == '臥室2') {
+                          line_bot($.extend({}, linebot1, { message: '臥室2切換狀態' }));
+                          led5.toggle();
+                        } else if (linebot1.onVal == '臥室3') {
+                          line_bot($.extend({}, linebot1, { message: '臥室3切換狀態' }));
+                          led6.toggle();
+                        } else if (linebot1.onVal == '燈全開/關') {
+                          line_bot($.extend({}, linebot1, { message: '已經幫你把全部的燈切換狀態' }));
+                          led.toggle();
+                          led2.toggle();
+                          led3.toggle();
+                          led4.toggle();
+                          led5.toggle();
+                          led6.toggle();
+                        } else if (linebot1.onVal == '網頁') {
+                          line_bot($.extend({}, linebot1, { message: '開啟網頁' }));
+                        } else if (linebot1.onVal == '開門') {
+                          line_bot($.extend({}, linebot1, { message: '門已開啟' }));
+                          servo.angle = 175;
+                        } else if (linebot1.onVal == '關門') {
+                          line_bot($.extend({}, linebot1, { message: '門已關閉' }));
+                          servo.angle = 85;
+                        } else if (linebot.onVal == '開關') {
+                          line_bot($.extend({}, linebot, { message: '開關切換狀態' }));
+                          relay.toggle();
+                        } else {
+                          if (linebot1.onVal != '關門' && linebot1.onVal != '臥室3' && linebot1.onVal != '開門' && linebot1.onVal != '臥室2' && linebot1.onVal != '臥室1' && linebot1.onVal != '客廳' && linebot1.onVal != '樓梯' && linebot1.onVal != '全關' && linebot1.onVal != '玄關' && linebot1.onVal != '關門' && linebot1.onVal != '開關' && linebot1.onVal != '全開') {
+                            line_bot($.extend({}, linebot1, { message: '指令錯誤' }));
+                          }
+                        }
+                      });
+                      firebase1ca6d.on('value', function (s) {
+                        var msg1ca6d = false;
+                        if (flag1ca6d) {
+                          flag1ca6d = false;
+                          return;
+                        } else {
+                          s.forEach(function (e) {
+                            if (e.val().userid === linebot2.userId && e.val().message !== '') {
+                              linebot2.onVal = e.val().message;
+                              msg1ca6d = true;
+                            }
+                          });
+                          if (!msg1ca6d) return;
+                        }
+                        if (linebot2.onVal == '全開') {
+                          line_bot($.extend({}, linebot2, { message: '已經幫你把全部的燈打開' }));
+                          led.on();
+                          led2.on();
+                          led3.on();
+                          led4.on();
+                          led5.on();
+                          led6.on();
+                        } else if (linebot2.onVal == '全關') {
+                          line_bot($.extend({}, linebot2, { message: '已經幫你把全部的燈關閉' }));
+                          led.off();
+                          led2.off();
+                          led3.off();
+                          led4.off();
+                          led5.off();
+                          led6.off();
+                        } else if (linebot2.onVal == '玄關') {
+                          line_bot($.extend({}, linebot2, { message: '玄關燈切換狀態' }));
+                          led.toggle();
+                        } else if (linebot2.onVal == '客廳') {
+                          line_bot($.extend({}, linebot2, { message: '客廳燈切換狀態' }));
+                          led2.toggle();
+                        } else if (linebot2.onVal == '樓梯') {
+                          line_bot($.extend({}, linebot2, { message: '已經幫你把全部的燈關閉' }));
+                          led3.toggle();
+                        } else if (linebot2.onVal == '臥室1') {
+                          line_bot($.extend({}, linebot2, { message: '已經幫你把全部的燈關閉' }));
+                          led4.toggle();
+                        } else if (linebot2.onVal == '臥室2') {
+                          line_bot($.extend({}, linebot2, { message: '已經幫你把全部的燈關閉' }));
+                          led5.toggle();
+                        } else if (linebot2.onVal == '臥室3') {
+                          line_bot($.extend({}, linebot2, { message: '已經幫你把全部的燈關閉' }));
+                          led6.toggle();
+                        } else if (linebot2.onVal == '燈全開/關') {
+                          line_bot($.extend({}, linebot2, { message: '已經幫你把全部的燈關閉' }));
+                          led.toggle();
+                          led2.toggle();
+                          led3.toggle();
+                          led4.toggle();
+                          led5.toggle();
+                          led6.toggle();
+                        } else if (linebot2.onVal == '網頁') {
+                          line_bot($.extend({}, linebot2, { message: '開啟網頁' }));
+                        } else if (linebot2.onVal == '開門') {
+                          line_bot($.extend({}, linebot2, { message: '門已開啟' }));
+                          servo.angle = 175;
+                        } else if (linebot2.onVal == '關門') {
+                          line_bot($.extend({}, linebot2, { message: '門已關閉' }));
+                          servo.angle = 85;
+                        } else if (linebot2.onVal == '開關') {
+                          line_bot($.extend({}, linebot, { message: '開關切換狀態' }));
+                          relay.toggle();
+                        } else {
+                          if (linebot2.onVal != '關門' && linebot2.onVal != '臥室3' && linebot2.onVal != '開門' && linebot2.onVal != '臥室2' && linebot2.onVal != '臥室1' && linebot2.onVal != '客廳' && linebot2.onVal != '樓梯' && linebot2.onVal != '全關' && linebot2.onVal != '玄關' && linebot2.onVal != '關門' && linebot2.onVal != '開關' && linebot2.onVal != '全開') {
+                            line_bot($.extend({}, linebot2, { message: '指令錯誤' }));
+                          }
+                        }
+                      });
+                      RFID();
+
+                    case 39:
+                    case 'end':
+                      return _context15.stop();
+                  }
+                }
+              }, _callee15, this);
+            }));
+
+            return function (_x3) {
+              return ref.apply(this, arguments);
+            };
+          })());
+
+        case 5:
+        case 'end':
+          return _context16.stop();
+      }
+    }
+  }, _callee16, this);
+}))();
+</script>
+</body>
